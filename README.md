@@ -14,58 +14,64 @@ System Design
 
 ## System Design
 
-Browser
-    ↓
+Client/Browser/Postman
+   ↓
 FastAPI
-    ↓
-Service Layer
-    ↓
-Repository Layer
-    ↓
+   ↓
+Services
+   ↓
+Repositories
+   ↓
 PostgreSQL
 
 Redis
 ├── OTP
 ├── Cache
-├── Queue
-└── Rate Limiter
+├── Rate Limiter
+├── Email Queue
+└── Notifications
 
 
 ## structure
 notification-hub/
+│
+├── app/
+|    │
+|    ├── api/
+|    │   ├── auth.py
+|    │   ├── users.py
+|    │   └── admin.py
+|    │
+|    ├── core/
+|    │   ├── config.py
+|    │   ├── security.py
+|    │   └── dependencies.py
+|    │
+|    ├── database/
+|    │   ├── session.py
+|    │   └── base.py
+|    │
+|    ├── models/
+|    │   ├── user.py
+|    │   └── refresh_token.py
+|    │
+|    ├── schemas/
+|    ├── repositories/
+|    ├── services/
+|    ├── redis/
+|    ├── workers/
+|    ├── utils/
+|    ├── templates/
+|    ├──static/
+|    └── main.py
+├── docker/
+├── requirements.txt
+├── docker-compose.yml
+├── .env
+└── README.md
 
-app/
-│
-├── api/
-│   ├── auth.py
-│   ├── users.py
-│   ├── otp.py
-│   └── admin.py
-│
-├── core/
-│   ├── config.py
-│   ├── security.py
-│   └── dependencies.py
-│
-├── database/
-│   ├── session.py
-│   └── base.py
-│
-├── models/
-│   ├── user.py
-│   └── refresh_token.py
-│
-├── repositories/
-├── services/
-├── redis/
-├── workers/
-├── schemas/
-├── templates/
-├── static/
-├── utils/
-└── main.py
-
-
+## App folder
+mkdir app\api app\core app\database app\models app\schemas app\repositories app\services app\redis app\workers app\utils app\templates app\static
 
 ## User Management
     User Registration
@@ -74,7 +80,13 @@ app/
     Access Token
     Refresh Token
     Role-Based Authorization (Admin/User)
+**Endpoints**
+GET /users/me
+PUT /users/me
 
+GET /admin/users
+PATCH /admin/users/{id}/status
+GET /admin/email-queue
 ## otp service
     Email Verification
     Forgot Password
@@ -154,7 +166,42 @@ develop
 | Frontend         | Jinja2           |
 
 
+## Authentication Flow
+Register
+   ↓
+Generate OTP
+   ↓
+Store OTP in Redis
+   ↓
+Send Email via Queue
+   ↓
+Verify Email
+   ↓
+Login
+   ↓
+Access Token + Refresh Token
 
+**Endpoints**
+POST /auth/register
+POST /auth/verify-email
+POST /auth/login
+POST /auth/refresh
+POST /auth/logout
+POST /auth/forgot-password
+POST /auth/reset-password
+
+## Forgot Password
+Forgot Password
+      ↓
+Generate OTP
+      ↓
+Store in Redis
+      ↓
+Email Queue
+      ↓
+Verify OTP
+      ↓
+Reset Password
 
 ## Outcomes
 

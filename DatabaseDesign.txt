@@ -1,0 +1,40 @@
+User Data:
+
+| Column          | Type      |
+| --------------- | --------- |
+| id              | UUID      |
+| username        | VARCHAR   |
+| email           | VARCHAR   |
+| hashed_password | VARCHAR   |
+| first_name      | VARCHAR   |
+| last_name       | VARCHAR   |
+| role            | ENUM      |
+| is_active       | BOOLEAN   |
+| is_verified     | BOOLEAN   |
+| created_at      | TIMESTAMP |
+| updated_at      | TIMESTAMP |
+
+Refresh Token Table:
+| Column     | Type      |
+| ---------- | --------- |
+| id         | UUID      |
+| user_id    | UUID      |
+| token      | TEXT      |
+| expires_at | TIMESTAMP |
+| created_at | TIMESTAMP |
+| is_revoked | BOOLEAN   |
+
+Redis Keys Design
+otp:verify:user@gmail.com
+TTL 300 seconds
+
+Password Reset
+otp:reset:user@gmail.com
+
+Rate Limiting
+rate:login:192.168.1.10
+rate:otp:user@gmail.com
+
+Cache
+user_profile:<user_id>
+dashboard:<user_id>
