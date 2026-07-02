@@ -38,3 +38,6 @@ rate:otp:user@gmail.com
 Cache
 user_profile:<user_id>
 dashboard:<user_id>
+
+Email Queue
+email_queue
