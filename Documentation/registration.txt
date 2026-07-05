@@ -1,0 +1,60 @@
+ Registration Flowchart
+ 
+ 
+                POST /auth/register
+                         │
+                         ▼
+                Validate Request
+                         │
+                         ▼
+          Does username already exist?
+                 │                │
+               Yes               No
+                 │                ▼
+            Return 409      Does email exist?
+                                  │
+                             Yes      No
+                              │        ▼
+                         Return 409   Hash Password
+                                         │
+                                         ▼
+                                Save User (is_verified=False)
+                                         │
+                                         ▼
+                                 Generate 6-digit OTP
+                                         │
+                                         ▼
+                             Store OTP in Redis (TTL 5 min)
+                                         │
+                                         ▼
+                           Push email job to Redis Queue
+                                         │
+                                         ▼
+                           Return "Registration Successful"
+
+
+
+
+Technical process Flowchart
+
+                POST /auth/register
+                        │
+                        ▼
+            Validate Request (Pydantic)
+                        │
+                        ▼
+              AuthService.register()
+                        │
+            ┌───────────┴───────────┐
+            ▼                       ▼
+Check username exists      Check email exists
+            │                       │
+            └───────────┬───────────┘
+                        ▼
+               Hash Password
+                        ▼
+          UserRepository.create_user()
+                        ▼
+                  PostgreSQL
+                        ▼
+              Return Success Response

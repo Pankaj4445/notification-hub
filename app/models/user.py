@@ -3,15 +3,16 @@ import uuid
 from sqlalchemy import (
     String,
     Boolean,
-    DateTime
+    DateTime,
+    Enum
 )
 
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
-
 from datetime import datetime
 
 from app.database.base import Base
+from app.enums.user_role import UserRole
 
 
 class User(Base):
@@ -43,9 +44,10 @@ class User(Base):
 
     last_name: Mapped[str | None]
 
-    role: Mapped[str] = mapped_column(
-        String(20),
-        default="user"
+    role: Mapped[UserRole] = mapped_column(
+        Enum(UserRole),
+        default=UserRole.USER,
+        nullable=False
     )
 
     is_active: Mapped[bool] = mapped_column(
