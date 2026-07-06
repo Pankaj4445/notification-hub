@@ -58,3 +58,27 @@ Check username exists      Check email exists
                   PostgreSQL
                         ▼
               Return Success Response
+
+
+POST /register
+        │
+        ▼
+Validate Request
+        ▼
+AuthService.register()
+        ▼
+Check Username
+        ▼
+Check Email
+        ▼
+Hash Password
+        ▼
+Create User
+        ▼
+Generate OTP
+        ▼
+Store OTP in Redis
+        ▼
+Queue Email
+        ▼
+Return Success

@@ -1,14 +1,19 @@
-from pydantic import (
-    BaseModel,
-    EmailStr,
-    Field,
-    model_validator
-)
-
 from typing import Self
 import re
 
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    EmailStr,
+    Field,
+    model_validator,
+)
+
 class RegisterRequest(BaseModel):
+
+    model_config = ConfigDict(
+        str_strip_whitespace=True
+    )
 
     username: str = Field(
         min_length=3,
@@ -30,6 +35,13 @@ class RegisterRequest(BaseModel):
     password: str
 
     confirm_password: str
+
+    @model_validator(mode="after")
+    def validate_passwords(self) -> Self:
+        if self.password != self.confirm_password:
+            raise ValueError("Passwords do not match.")
+
+        return self
 
 class RegisterResponse(BaseModel):
 

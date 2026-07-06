@@ -35,35 +35,50 @@ Redis
 ## structure
 notification-hub/
 │
-├── app/
-|    │
-|    ├── api/
-|    │   ├── auth.py
-|    │   ├── users.py
-|    │   └── admin.py
-|    │
-|    ├── core/
-|    │   ├── config.py
-|    │   ├── security.py
-|    │   └── dependencies.py
-|    │
-|    ├── database/
-|    │   ├── session.py
-|    │   └── base.py
-|    │
-|    ├── models/
-|    │   ├── user.py
-|    │   └── refresh_token.py
-|    │
-|    ├── schemas/
-|    ├── repositories/
-|    ├── services/
-|    ├── redis/
-|    ├── workers/
-|    ├── utils/
-|    ├── templates/
-|    ├──static/
-|    └── main.py
+├──app/
+│   │
+│   ├── api/
+│   │   └── v1/
+│   │       ├── auth.py
+│   │       ├── users.py
+│   │       ├── notifications.py
+│   │       └── admin.py
+│   │
+│   ├── core/
+│   │   ├── config.py
+│   │   ├── logging.py
+│   │   └── security.py
+│   │
+│   ├── database/
+│   │   ├── base.py
+│   │   ├── dependency.py
+│   │   └── session.py
+│   │
+│   ├── models/
+│   │
+│   ├── schemas/
+│   │
+│   ├── repositories/
+│   │
+│   ├── services/
+│   │
+│   ├── security/
+│   │
+│   ├── redis/
+│   │
+│   ├── workers/
+│   │
+│   ├── exceptions/
+│   │
+│   ├── enums/
+│   │
+│   ├── constants/
+│   │
+│   ├── utils/
+│   │
+│   ├── static/
+│   │
+│   └── templates/
 ├── docker/
 ├── requirements.txt
 ├── docker-compose.yml
