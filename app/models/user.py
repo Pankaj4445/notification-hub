@@ -40,12 +40,21 @@ class User(Base):
         nullable=False
     )
 
-    first_name: Mapped[str | None]
+    first_name: Mapped[str | None] = mapped_column(
+    String(100),
+    nullable=True
+    )
 
-    last_name: Mapped[str | None]
+    last_name: Mapped[str | None] = mapped_column(
+        String(100),
+        nullable=True
+    )
 
     role: Mapped[UserRole] = mapped_column(
-        Enum(UserRole),
+        Enum(
+            UserRole,
+            name="userrole"
+        ),
         default=UserRole.USER,
         nullable=False
     )
@@ -60,7 +69,10 @@ class User(Base):
         default=False
     )
 
-    profile_picture: Mapped[str | None]
+    profile_picture: Mapped[str | None] = mapped_column(
+        String(255),
+        nullable=True
+    )
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime,

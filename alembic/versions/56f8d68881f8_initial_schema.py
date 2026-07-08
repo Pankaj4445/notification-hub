@@ -1,8 +1,8 @@
-"""create users table
+"""initial schema
 
-Revision ID: ecd8f7945e50
+Revision ID: 56f8d68881f8
 Revises: 
-Create Date: 2026-07-02 18:34:43.662989
+Create Date: 2026-07-08 01:43:31.803852
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'ecd8f7945e50'
+revision: str = '56f8d68881f8'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -26,12 +26,12 @@ def upgrade() -> None:
     sa.Column('username', sa.String(length=50), nullable=False),
     sa.Column('email', sa.String(length=255), nullable=False),
     sa.Column('hashed_password', sa.String(length=255), nullable=False),
-    sa.Column('first_name', sa.String(), nullable=True),
-    sa.Column('last_name', sa.String(), nullable=True),
-    sa.Column('role', sa.String(length=20), nullable=False),
+    sa.Column('first_name', sa.String(length=100), nullable=True),
+    sa.Column('last_name', sa.String(length=100), nullable=True),
+    sa.Column('role', sa.Enum('ADMIN', 'USER', name='userrole'), nullable=False),
     sa.Column('is_active', sa.Boolean(), nullable=False),
     sa.Column('is_verified', sa.Boolean(), nullable=False),
-    sa.Column('profile_picture', sa.String(), nullable=True),
+    sa.Column('profile_picture', sa.String(length=255), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=False),
     sa.PrimaryKeyConstraint('id'),
