@@ -1,6 +1,5 @@
 from typing import Self
 import re
-
 from pydantic import (
     BaseModel,
     ConfigDict,

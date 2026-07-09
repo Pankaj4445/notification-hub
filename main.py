@@ -8,7 +8,7 @@ app.include_router(auth_router)
 async def home():
     return {"message": "NotificationHub API is running"}
 
-from app.redis.client import redis_client
+# from app.redis.client import redis_client
 
-redis_client.set("test", "hello")
-print(redis_client.get("test"))
+# redis_client.set("test", "hello")
+# print(redis_client.get("test"))

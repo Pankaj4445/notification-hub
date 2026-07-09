@@ -6,12 +6,14 @@ from app.models.user import User
 from app.repositories.user_repository import UserRepository
 from app.schemas.auth import RegisterRequest, RegisterResponse
 from app.security.password import hash_password
+from app.services.otp_service import OTPService
 
 
 class AuthService:
 
-    def __init__(self, user_repository: UserRepository):
+    def __init__(self, user_repository: UserRepository, otp_service: OTPService):
         self.user_repository = user_repository
+        self.otp_service = otp_service
 
     async def register(
         self,
@@ -42,6 +44,9 @@ class AuthService:
 
         await self.user_repository.create_user(user)
 
+        otp = await self.otp_service.create_otp(user.email)
+        print(f"Registration OTP for {user.email}: {otp}")
+        
         return RegisterResponse(
             message="Registration successful.",
             email=user.email,
