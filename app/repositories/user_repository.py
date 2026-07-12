@@ -1,5 +1,6 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+import uuid
 
 from app.models.user import User
 
@@ -25,4 +26,15 @@ class UserRepository:
         self.db.add(user)
         await self.db.commit()
         await self.db.refresh(user)
+        return user
+    
+    async def activate_user(
+        self,
+        user: User,
+    ) -> User:
+        user.is_verified = True
+
+        await self.db.commit()
+        await self.db.refresh(user)
+
         return user

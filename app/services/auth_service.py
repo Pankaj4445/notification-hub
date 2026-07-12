@@ -1,19 +1,43 @@
 from app.exceptions.auth import (
     EmailAlreadyExistsException,
     UsernameAlreadyExistsException,
+    UserAlreadyVerifiedException,
+    UserNotFoundException,
 )
 from app.models.user import User
 from app.repositories.user_repository import UserRepository
-from app.schemas.auth import RegisterRequest, RegisterResponse
+from app.schemas.auth import RegisterRequest, RegisterResponse, VerifyOTPRequest, VerifyOTPResponse
 from app.security.password import hash_password
 from app.services.otp_service import OTPService
+from app.services.email_service import EmailService
 
 
 class AuthService:
 
-    def __init__(self, user_repository: UserRepository, otp_service: OTPService):
+    def __init__(self, user_repository: UserRepository, otp_service: OTPService,email_service: EmailService):
         self.user_repository = user_repository
         self.otp_service = otp_service
+        self.email_service = email_service
+
+    async def verify_otp(
+        self,
+        request: VerifyOTPRequest,
+    ) -> VerifyOTPResponse:
+        
+        user = await self.user_repository.get_by_email(request.email)
+        if not user:
+            raise UserNotFoundException()
+        
+        if user.is_verified:
+            raise UserAlreadyVerifiedException()
+        
+        await self.otp_service.verify_otp(user.email, request.otp)
+
+        await self.user_repository.activate_user(user)
+
+        return VerifyOTPResponse(
+            message="OTP verified successfully."
+        )
 
     async def register(
         self,
@@ -45,7 +69,11 @@ class AuthService:
         await self.user_repository.create_user(user)
 
         otp = await self.otp_service.create_otp(user.email)
-        print(f"Registration OTP for {user.email}: {otp}")
+
+        await self.email_service.send_otp(
+            email=user.email,
+            otp=otp
+        )
         
         return RegisterResponse(
             message="Registration successful.",

@@ -13,6 +13,8 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int
     REFRESH_TOKEN_EXPIRE_DAYS: int
 
+    SMTP_HOST: str
+    SMTP_PORT: int
     SMTP_EMAIL: str
     SMTP_PASSWORD: str
 

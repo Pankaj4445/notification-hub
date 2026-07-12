@@ -2,6 +2,7 @@ import secrets
 
 from app.redis.client import redis_client
 from app.core.config import settings
+from app.exceptions.auth import InvalidOTPException, UserAlreadyVerifiedException
 
 class OTPService:
 
@@ -22,9 +23,9 @@ class OTPService:
         key = self.register_otp_key(email)
         stored_otp = await redis_client.get(key)
         if stored_otp is None:
-            return False
+            raise InvalidOTPException()
         elif stored_otp != otp:
-            return False
+            raise InvalidOTPException()
         await redis_client.delete(key)
         return True
     

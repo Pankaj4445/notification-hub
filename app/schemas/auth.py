@@ -47,3 +47,20 @@ class RegisterResponse(BaseModel):
     message: str
 
     email: EmailStr
+
+
+class VerifyOTPRequest(BaseModel):
+    model_config = ConfigDict(
+        str_strip_whitespace=True
+    )
+    email: EmailStr
+    otp: str = Field(
+        min_length=6,
+        max_length=6,
+        pattern=r"^\d{6}$",
+        description="A 6-digit OTP code."
+    )
+
+
+class VerifyOTPResponse(BaseModel):
+    message: str
