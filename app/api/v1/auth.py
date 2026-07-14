@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 
 from app.api.dependencies import get_auth_service
-from app.schemas.auth import RegisterRequest, RegisterResponse, VerifyOTPRequest, VerifyOTPResponse
+from app.schemas.auth import RegisterRequest, RegisterResponse, VerifyOTPRequest, VerifyOTPResponse, LoginResponse, LoginRequest
 from app.services.auth_service import AuthService
 
 router = APIRouter(
@@ -29,3 +29,13 @@ async def verify_otp(
     service: AuthService = Depends(get_auth_service),
 ):
     return await service.verify_otp(request)
+
+@router.post(
+    "/login",
+    response_model = LoginResponse,
+)
+async def login(
+    request: LoginRequest,
+    service: AuthService = Depends(get_auth_service),
+):
+    return await service.login(request)

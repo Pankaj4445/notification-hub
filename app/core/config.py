@@ -25,6 +25,10 @@ class Settings(BaseSettings):
 
     OTP_EXPIRY_SECONDS: int
 
+    SECRET_KEY: str
+    JWT_ALGORITHM: str
+    ACCESS_TOKEN_EXPIRE_MINUTES: int
+
     class Config:
         env_file = ".env"
 

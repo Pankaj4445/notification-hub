@@ -1,5 +1,6 @@
 from typing import Self
 import re
+from uuid import UUID
 from pydantic import (
     BaseModel,
     ConfigDict,
@@ -7,6 +8,9 @@ from pydantic import (
     Field,
     model_validator,
 )
+
+from app.enums.user_role import UserRole
+
 
 class RegisterRequest(BaseModel):
 
@@ -64,3 +68,27 @@ class VerifyOTPRequest(BaseModel):
 
 class VerifyOTPResponse(BaseModel):
     message: str
+
+
+class LoginRequest(BaseModel):
+    email: EmailStr
+    password: str
+
+class LoginResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    user: UserResponse
+
+class UserResponse(BaseModel):
+
+    model_config = ConfigDict(
+        from_attributes=True
+    )
+
+    id: UUID
+    username: str
+    email: EmailStr
+    first_name: str | None
+    last_name: str | None
+    role: UserRole
+    is_verified: bool

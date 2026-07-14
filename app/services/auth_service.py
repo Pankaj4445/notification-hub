@@ -1,23 +1,33 @@
 from app.exceptions.auth import (
     EmailAlreadyExistsException,
+    InvalidCredentialsException,
     UsernameAlreadyExistsException,
     UserAlreadyVerifiedException,
     UserNotFoundException,
+    UserNotVerifiedException,
 )
 from app.models.user import User
 from app.repositories.user_repository import UserRepository
-from app.schemas.auth import RegisterRequest, RegisterResponse, VerifyOTPRequest, VerifyOTPResponse
-from app.security.password import hash_password
+from app.schemas.auth import RegisterRequest, RegisterResponse, VerifyOTPRequest, VerifyOTPResponse, LoginRequest, LoginResponse, UserResponse
+from app.security.password import hash_password, verify_password
 from app.services.otp_service import OTPService
 from app.services.email_service import EmailService
+from app.security.jwt import JWTService
 
 
 class AuthService:
 
-    def __init__(self, user_repository: UserRepository, otp_service: OTPService,email_service: EmailService):
+    def __init__(
+        self,
+        user_repository: UserRepository,
+        otp_service: OTPService,
+        email_service: EmailService,
+        jwt_service: JWTService,
+    ):
         self.user_repository = user_repository
         self.otp_service = otp_service
         self.email_service = email_service
+        self.jwt_service = jwt_service
 
     async def verify_otp(
         self,
@@ -78,4 +88,34 @@ class AuthService:
         return RegisterResponse(
             message="Registration successful.",
             email=user.email,
+        )
+    
+    async def login(
+        self,
+        request: LoginRequest,
+    ) -> LoginResponse:
+        user = await self.user_repository.get_by_email(
+            request.email
+        )
+        if not user:
+            raise InvalidCredentialsException()
+        if not user.is_verified:
+            raise UserNotVerifiedException()
+        
+        if not verify_password(
+            request.password,
+            user.hashed_password,
+        ):
+            raise InvalidCredentialsException()
+        
+        token = self.jwt_service.create_access_token(
+            user_id=user.id,
+            email=user.email,
+            role=user.role,
+        )
+
+        return LoginResponse(
+            access_token=token,
+            token_type="bearer",
+            user=UserResponse.model_validate(user)
         )
