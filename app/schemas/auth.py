@@ -1,5 +1,4 @@
 from typing import Self
-import re
 from uuid import UUID
 from pydantic import (
     BaseModel,
@@ -74,11 +73,6 @@ class LoginRequest(BaseModel):
     email: EmailStr
     password: str
 
-class LoginResponse(BaseModel):
-    access_token: str
-    token_type: str = "bearer"
-    user: UserResponse
-
 class UserResponse(BaseModel):
 
     model_config = ConfigDict(
@@ -92,3 +86,44 @@ class UserResponse(BaseModel):
     last_name: str | None
     role: UserRole
     is_verified: bool
+    is_active: bool
+
+class LoginResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    user: UserResponse
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+
+class ForgotPasswordResponse(BaseModel):
+    message: str
+
+
+class ResetPasswordRequest(BaseModel):
+
+    email: EmailStr
+
+    otp: str = Field(
+        min_length=6,
+        max_length=6,
+        pattern=r"^\d{6}$",
+    )
+
+    new_password: str
+
+    confirm_password: str
+
+    @model_validator(mode="after")
+    def validate_passwords(self) -> Self:
+        if self.new_password != self.confirm_password:
+            raise ValueError(
+                "Passwords do not match."
+            )
+
+        return self
+
+
+class ResetPasswordResponse(BaseModel):
+    message: str

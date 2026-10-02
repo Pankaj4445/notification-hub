@@ -1,17 +1,31 @@
 from app.exceptions.auth import (
     EmailAlreadyExistsException,
     InvalidCredentialsException,
+    UserInactiveException,
     UsernameAlreadyExistsException,
     UserAlreadyVerifiedException,
     UserNotFoundException,
     UserNotVerifiedException,
+    PasswordReuseException
 )
 from app.models.user import User
 from app.repositories.user_repository import UserRepository
-from app.schemas.auth import RegisterRequest, RegisterResponse, VerifyOTPRequest, VerifyOTPResponse, LoginRequest, LoginResponse, UserResponse
+from app.schemas.auth import ( 
+    RegisterRequest,
+    RegisterResponse,
+    VerifyOTPRequest, 
+    VerifyOTPResponse, 
+    LoginRequest, 
+    LoginResponse, 
+    UserResponse,
+    ForgotPasswordRequest,
+    ForgotPasswordResponse,
+    ResetPasswordRequest,
+    ResetPasswordResponse
+)
 from app.security.password import hash_password, verify_password
 from app.services.otp_service import OTPService
-from app.services.email_service import EmailService
+from app.services.notification_service import NotificationService
 from app.security.jwt import JWTService
 
 
@@ -20,15 +34,16 @@ class AuthService:
     def __init__(
         self,
         user_repository: UserRepository,
-        otp_service: OTPService,
-        email_service: EmailService,
+        notification_service: NotificationService,
         jwt_service: JWTService,
+        otp_service: OTPService,
     ):
         self.user_repository = user_repository
         self.otp_service = otp_service
-        self.email_service = email_service
+        self.notification_service = notification_service
         self.jwt_service = jwt_service
 
+    #verify_otp for activate user.
     async def verify_otp(
         self,
         request: VerifyOTPRequest,
@@ -40,8 +55,13 @@ class AuthService:
         
         if user.is_verified:
             raise UserAlreadyVerifiedException()
-        
-        await self.otp_service.verify_otp(user.email, request.otp)
+
+        #verify_otp for actual check otp entered is correct or not
+        await self.otp_service.verify_otp(
+            purpose="register",
+            email=user.email,
+            otp=request.otp,
+        )
 
         await self.user_repository.activate_user(user)
 
@@ -78,11 +98,8 @@ class AuthService:
 
         await self.user_repository.create_user(user)
 
-        otp = await self.otp_service.create_otp(user.email)
-
-        await self.email_service.send_otp(
-            email=user.email,
-            otp=otp
+        await self.notification_service.send_registration_otp(
+            user.email,
         )
         
         return RegisterResponse(
@@ -108,14 +125,81 @@ class AuthService:
         ):
             raise InvalidCredentialsException()
         
-        token = self.jwt_service.create_access_token(
+        if not user.is_active:
+            raise UserInactiveException()
+        
+        access_token = self.jwt_service.create_access_token(
             user_id=user.id,
             email=user.email,
             role=user.role,
         )
 
         return LoginResponse(
-            access_token=token,
+            access_token=access_token,
             token_type="bearer",
             user=UserResponse.model_validate(user)
+        )
+
+    async def forgot_password(
+        self,
+        request: ForgotPasswordRequest,
+    ) -> ForgotPasswordResponse:
+
+        user = await self.user_repository.get_by_email(
+            request.email
+        )
+
+        # Prevent email enumeration
+        if not user:
+            return ForgotPasswordResponse(
+                message="If an account exists, a password reset OTP has been sent."
+            )
+
+        if not user.is_verified:
+            return ForgotPasswordResponse(
+                message="If an account exists, a password reset OTP has been sent."
+            )
+
+        await self.notification_service.send_password_reset_otp(
+            user.email,
+        )
+
+        return ForgotPasswordResponse(
+            message="If an account exists, a password reset OTP has been sent."
+        )
+
+    async def reset_password(
+        self,
+        request: ResetPasswordRequest,
+    ) -> ResetPasswordResponse:
+        user = await self.user_repository.get_by_email(
+            request.email
+        )
+
+        if not user:
+            raise UserNotFoundException()
+
+        await self.otp_service.verify_otp(
+            purpose="reset",
+            email=user.email,
+            otp=request.otp,
+        )
+
+        if verify_password(
+            request.new_password,
+            user.hashed_password,
+        ):
+            raise PasswordReuseException()
+
+        hashed_password = hash_password(
+            request.new_password
+        )
+
+        await self.user_repository.update_password(
+            user,
+            hashed_password,
+        )
+
+        return ResetPasswordResponse(
+            message="Password reset successfully."
         )

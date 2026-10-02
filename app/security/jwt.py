@@ -1,11 +1,11 @@
 from uuid import UUID
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+
+import jwt
 from jwt import (
     ExpiredSignatureError,
     InvalidTokenError,
 )
-
-import jwt
 
 from app.enums.user_role import UserRole
 from app.exceptions.auth import TokenExpiredException, InvalidTokenException
@@ -28,7 +28,7 @@ class JWTService:
         email: str,
         role: UserRole,
     ) -> str:
-        expire = datetime.utcnow() + timedelta(
+        expire = datetime.now(timezone.utc) + timedelta(
             minutes=self.access_token_expire_minutes
         )
         payload = {
@@ -52,14 +52,14 @@ class JWTService:
                 algorithms=[self.algorithm],
             )
 
-            required_claims = (
+            REQUIRED_CLAIMS = (
                 "sub",
                 "email",
                 "role",
                 "exp",
             )
 
-            for claim in required_claims:
+            for claim in REQUIRED_CLAIMS:
                 if claim not in payload:
                     raise InvalidTokenException()
 

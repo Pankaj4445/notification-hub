@@ -8,7 +8,7 @@ from sqlalchemy import (
 )
 
 from sqlalchemy.orm import Mapped
-from sqlalchemy.orm import mapped_column
+from sqlalchemy.orm import mapped_column, relationship
 from datetime import datetime
 
 from app.database.base import Base
@@ -72,6 +72,12 @@ class User(Base):
     profile_picture: Mapped[str | None] = mapped_column(
         String(255),
         nullable=True
+    )
+
+    sessions = relationship(
+        "UserSession",
+        back_populates="user",
+        cascade="all, delete-orphan",
     )
 
     created_at: Mapped[datetime] = mapped_column(

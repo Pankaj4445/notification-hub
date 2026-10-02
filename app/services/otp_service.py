@@ -6,21 +6,35 @@ from app.exceptions.auth import InvalidOTPException, UserAlreadyVerifiedExceptio
 
 class OTPService:
 
-    def register_otp_key(self,email: str) -> str:
-        return f"register_otp:{email}"
+    def build_key(
+        self,
+        purpose: str,
+        email: str,
+    ) -> str:
+        return f"otp:{purpose}:{email}"
 
     def generate_otp(self) -> str:
         return f"{secrets.randbelow(1_000_000):06d}"
     
-    async def store_otp(self, email: str, otp: str):
+    async def store_otp(
+        self,
+        purpose: str,
+        email: str,
+        otp: str,
+    ):
         await redis_client.set(
-            self.register_otp_key(email),
+            self.build_key(purpose,email),
             otp,
             ex=settings.OTP_EXPIRY_SECONDS
         )
 
-    async def verify_otp(self, email: str, otp: str) -> bool:
-        key = self.register_otp_key(email)
+    async def verify_otp(
+        self,
+        purpose: str,
+        email: str,
+        otp: str,
+    ):
+        key = self.build_key(purpose,email)
         stored_otp = await redis_client.get(key)
         if stored_otp is None:
             raise InvalidOTPException()
@@ -29,8 +43,12 @@ class OTPService:
         await redis_client.delete(key)
         return True
     
-    async def create_otp(self, email: str) -> str:
+    async def create_otp(
+        self,
+        purpose: str,
+        email: str,
+    ):
         otp = self.generate_otp()
-        await self.store_otp(email, otp)
+        await self.store_otp(purpose,email, otp)
         return otp
         

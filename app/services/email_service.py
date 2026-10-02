@@ -18,29 +18,29 @@ class EmailService:
         self.username = username
         self.password = password
 
-    def _build_otp_subject(self) -> str:
-        return "Notification Hub - Email Verification Code"
+    # def _build_otp_subject(self) -> str:
+    #     return "Notification Hub - Email Verification Code"
     
-    def _build_otp_body(
-        self,
-        otp: str
-    ) -> str:
-        expiry_minutes = settings.OTP_EXPIRY_SECONDS // 60
-        return dedent(f"""Hello,
+#     def _build_otp_body(
+#         self,
+#         otp: str
+#     ) -> str:
+#         expiry_minutes = settings.OTP_EXPIRY_SECONDS // 60
+#         return dedent(f"""Hello,
 
-Thank you for registering with Notification Hub.
+# Thank you for registering with Notification Hub.
 
-Your verification code is:
+# Your verification code is:
 
-{otp}
+# {otp}
 
-This OTP is valid for {expiry_minutes} minutes.
+# This OTP is valid for {expiry_minutes} minutes.
 
-If you didn't request this, you can safely ignore this email.
+# If you didn't request this, you can safely ignore this email.
 
-Regards,
-Notification Hub Team
-""")
+# Regards,
+# Notification Hub Team
+# """)
     
     async def send(
         self,
@@ -61,17 +61,17 @@ Notification Hub Team
             server.login(self.username, self.password)
             server.send_message(msg)
 
-    async def send_otp(
-        self,
-        email: str,
-        otp: str
-    ):
-        subject = self._build_otp_subject()
+    # async def send_otp(
+    #     self,
+    #     email: str,
+    #     otp: str
+    # ):
+    #     subject = self._build_otp_subject()
 
-        body = self._build_otp_body(otp)
+    #     body = self._build_otp_body(otp)
 
-        await self.send(
-            to_email=email,
-            subject=subject,
-            body=body
-        )
+    #     await self.send(
+    #         to_email=email,
+    #         subject=subject,
+    #         body=body
+    #     )
